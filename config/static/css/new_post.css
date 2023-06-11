@@ -1,0 +1,12 @@
+div[name="price-value"] {
+    display: none;
+}
+div[name="count-value"] {
+    display: none;
+}
+input[name="product_field"]:checked~div[name="price-value"] {
+    display: inline-block;
+}
+input[name="product_field"]:checked~div[name="count-value"] {
+    display: inline-block;
+}

@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+    
+    <link rel="stylesheet" href="{% static 'css/mainPage.css' %}">
+
+    <div class="container">
+      <div class="row justify-content-start">
+        <div class="col-5">
+          {% if news_list %}
+            {% for news in news_list %}
+            <div class="card mb-3" style="width:80%; top:0; bottom: 0; left: 0; right: 0; margin: auto;">
+              <form action="userPage/{{news.user.id}}" method="POST">
+                {% csrf_token %}
+                <div style="margin-top: 5px; margin-bottom: 5px;">
+                  <div class="container">
+                    <div class="row">
+                      <div class="col-1">
+                        <img src={{news.user.avatar}} class="rounded-circle user_img">
+                      </div>
+                      <div class="col-10">
+                        <h5 class="card-title">
+                          <input type="submit" name='userpage' value="{{news.user.username}}" style="background: transparent; border: none; width: 100%;" />
+                        </h5>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+              <img src="{{news.image.url}}" class="card-img-top" alt="...">
+              <div class="card-body">
+                <p class="card-text">{{news.user.username}}: {{news.text}} </p>
+                <div class="container">
+                  {% if news.product %}
+                  <div class="row">
+                    <div class="col-8">
+                      Стоимость: {{news.price}} руб.
+                      Количество: {{news.count}}
+                    </div>
+                    <div class="col-4">
+                      {% if news.user != user and news.id not in orders %}
+                      <form action="{% url 'ecommerce' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="post_id" value={{news.id}}>
+                        <input type="submit" name='buy' value="Добавить в корзину" style="background: transparent; border-radius: 15px;" />
+                      </form>
+                      {% elif news.id in orders %}
+                        <input type="submit" name="buy" value="В корзине" disabled style="background: transparent; border-radius: 15px;" />
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endif %}
+                  <div class="row">
+                    <div class="col-8">
+                      <form action="likes/{{news.id}}/{{user.id}}/" method="POST">
+                        {% csrf_token %}
+                        {% if user in news.likes.all %}
+                          <input type="submit" name='likes' value="Лайк" style="background: transparent; border-radius: 15px; color: red;" />: {{news.likes.count}} 
+                        {% else %}
+                          <input type="submit" name='likes' value="Лайк" style="background: transparent; border-radius: 15px;" />: {{news.likes.count}} 
+                        {% endif %}
+                      </form>
+                    </div>
+                    <div class="col-6">
+                      <form action="dislikes/{{news.id}}/{{user.id}}/" method="POST">
+                        {% csrf_token %}
+                        {% if user in news.dislikes.all %}
+                          <input type="submit" name='dislikes' value="Дизлайк" style="background: transparent; border-radius: 15px; color: red;" />: {{news.dislikes.count}}
+                        {% else %}
+                          <input type="submit" name='dislikes' value="Дизлайк" style="background: transparent; border-radius: 15px;" />: {{news.dislikes.count}}
+                        {% endif %}
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                {% for comment in image_comments %}
+                  {% if news == comment.image %}
+                    <p>{{comment.user.username}}: {{comment.text}}</p>
+                  {% endif %}
+                {% endfor %}
+                <p>
+                  <form action="add_comment/{{news.id}}/" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                      <input type="text" name="text_field" style="width:80%" />
+                      <input class="btn btn-primary" type="submit" name="submit" value="Комментировать" style="background-color: #6eeb91; color: black;" />
+                  </form>
+                </p>
+              </div>
+            </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+        <div class="col-4">
+          <p>Все пользователи:</p>
+            {% if users_list %}
+              {% for users in users_list %}
+                {% if users != user %}
+                <div class="card mb-3" style="width:100%; top:0; bottom: 0; left: 0; right: 0; margin: 10px; padding: 10px">
+                  <form action="subscribe/{{users.id}}/" method="POST">
+                    {% csrf_token %}
+                    <a href="/mainPage/userPage/{{users.id}}" >
+                      <img src={{users.avatar}} class="rounded-circle user_img">
+                      {{ users.username }}
+                    </a>
+                    <input type="submit" name='subscribe' value="Подписаться" /><br/>
+                  </form>
+                </div>
+                {% endif %}
+              {% endfor %}
+            {% else %}
+              Why???
+            {% endif %}
+
+          <p>Вы подписаны:</p>
+          {% if follower_list %}
+            {% for follow in follower_list %}
+              {% for users in follow.follower_user.all %}
+              <div class="card mb-3" style="width:100%; top:0; bottom: 0; left: 0; right: 0; margin: 10px; padding: 10px">
+                <form action="unsubscribe/{{users.id}}/" method="POST">
+                  {% csrf_token %}
+                    <a href="/mainPage/userPage/{{users.id}}">
+                      <img src={{users.avatar}} class="rounded-circle user_img">
+                      {{ users.username }}
+                    </a>
+                  <input type="submit" name='unsubscribe' value="Отписаться" /><br/>
+                </form>
+              </div>
+              {% endfor %}
+            {% endfor %}
+          {% endif %}
+          <p>Ваши подписчики:</p>
+          {% if following_list %}
+            {% for follow in following_list %}
+              {% for users in follow.following_user.all %}
+              <div class="card mb-3" style="width:100%; top:0; bottom: 0; left: 0; right: 0; margin: 10px; padding: 10px">
+                <form method="post">
+                {% csrf_token %}
+                  <a href="/mainPage/userPage/{{users.id}}">
+                  <img src={{users.avatar}} class="rounded-circle user_img">
+                  {{ users.username }}
+                  </a>
+                </form>
+              </div>
+              {% endfor %}
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+{% endblock content %}
+

@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>{{user_name}}</h1>
+
+    {% if news_list %}
+      {% for news in news_list %}
+      <div class="card mb-3" style="width:30%; top:0; bottom: 0; left: 0; right: 0; margin: auto;">
+        <img src="{{news.image.url}}" class="card-img-top" alt="...">
+        <div class="card-body">
+          <form action="userPage/{{news.user.id}}/" method="POST">
+            {% csrf_token %}
+            <h5 class="card-title">
+              <input type="submit" name='userpage' value="{{news.user}}") style="background: transparent; border: none;" />
+            </h5>
+          </form>
+          <p class="card-text">{{news.text}} </p>
+          <form action="likes/{{news.id}}/{{user.id}}/" method="POST">
+            {% csrf_token %}
+            {% if user in news.likes.all %}
+              <input type="submit" name='likes' value="Likes" style="color:red;") />: {{news.likes.count}} 
+            {% else %}
+              <input type="submit" name='likes' value="Likes") />: {{news.likes.count}} 
+            {% endif %}
+          </form>
+          <form action="dislikes/{{news.id}}/{{user.id}}/" method="POST">
+            {% csrf_token %}
+            {% if user in news.dislikes.all %}
+              <input type="submit" name='dislikes' value="Dislikes" style="color:red;") />: {{news.dislikes.count}}
+            {% else %}
+              <input type="submit" name='dislikes' value="Dislikes") />: {{news.dislikes.count}}
+            {% endif %}
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+{% endblock content %}

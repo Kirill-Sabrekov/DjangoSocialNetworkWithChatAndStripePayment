@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/new_post.css' %}">
+
+<form action="submit/" method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    Описание: <input type="text" name="text_field"/></li>
+    <input type="file" name="image_field"/></li>
+    <hr class="dropdown-divider"></li>
+    Товар: <input type="checkbox" name="product_field" />
+    <div name="price-value">
+    Стоимость: <input type="number" name="price_field" />
+    </div>
+    <div name="count-value">
+    Количество: <input type="number" name="count_field" />
+    </div>
+    <input class="btn btn-primary" type="submit" name="submit" value="Загрузить" /></li>
+</form>
+{% endblock content %}
